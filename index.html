@@ -60,6 +60,7 @@ summary{cursor:pointer;font-weight:600}
 .sq{display:inline-block;width:22px;height:22px;border-radius:4px;margin:2px}
 .vs{display:flex;gap:8px;align-items:center}.vs span{font-weight:700;color:#c9780a}
 .topbar{display:flex;justify-content:space-between;align-items:center;margin-top:4px}
+.scr{max-height:340px;overflow-y:auto}
 .vmb{background:transparent;border:1px solid var(--or);color:var(--or);padding:6px 10px;font-size:13px;font-weight:700}
 body.vm{--bg:#2b1a4d}body.vm .vmb{background:var(--or);color:var(--nv)}
 .vmbn{background:var(--or);color:var(--nv);font-weight:700;font-size:13px;padding:8px 12px;border-radius:6px;margin:8px 0}
@@ -279,13 +280,22 @@ function statsView(){
   +'<div class="st"><b>'+avg(bs.filter(function(b){return b.status==="won"}))+' / '+avg(bs.filter(function(b){return b.status==="lost"}))+'</b><span>Odd média ganhas / perdidas</span></div></div>';
   h+='<h3>Lucro acumulado</h3><div class="card">'+chart(cl)+'</div>';
   var S1=agg(bs.filter(function(b){return b.legs.length===1})),M1=agg(bs.filter(function(b){return b.legs.length>1}));
+  var BE=be(bs);
+  h+='<h3>Taxa de acerto necessária</h3><div class="card">'+(BE?'<div class="final" style="font-size:18px"><span>Precisas de <b class="or">'+pc(BE.need)+'%</b></span><span>Tens <b class="'+(BE.cur>=BE.need?"pos":"neg")+'">'+pc(BE.cur)+'%</b></span></div><p class="mut" style="margin:0 0 8px">'+(BE.cur>=BE.need?"Estás "+pc(BE.cur-BE.need)+" pontos acima do mínimo para teres lucro.":"Estás "+pc(BE.need-BE.cur)+" pontos abaixo do mínimo para teres lucro.")+'</p><p class="mut" style="margin:0 0 8px">Calculada com a odd média das apostas concluídas ('+o2(BE.o)+'): 100% ÷ odd.</p>'+beRow("Simples",be(bs.filter(function(b){return b.legs.length===1})))+beRow("Múltiplas",be(bs.filter(function(b){return b.legs.length>1}))):'<span class="mut">Precisas de apostas concluídas.</span>')+'</div>';
   h+='<h3>Simples vs. múltiplas</h3><div class="card">'
   +[["Simples",S1],["Múltiplas",M1]].map(function(r){return '<div class="bar"><span>'+r[0]+' <span class="mut">('+r[1].n+')</span></span><span>'+rate(r[1])+' · <b class="'+(r[1].pr>=0?"pos":"neg")+'">'+eur(r[1].pr)+'</b></span></div>'}).join("")+'</div>';
   var mk={};bs.filter(function(b){return b.legs.length===1}).forEach(function(b){var k=b.legs[0].market||"Sem mercado";(mk[k]=mk[k]||[]).push(b)});
-  var rows=Object.keys(mk).map(function(k){return[k,agg(mk[k])]}).filter(function(r){return r[1].n}).sort(function(a,b){return b[1].pr-a[1].pr}).slice(0,6);
-  h+='<h3>Mercados (apostas simples)</h3><div class="card">'+(rows.length?rows.map(function(r){return '<div class="bar"><span>'+esc(r[0])+' <span class="mut">('+r[1].n+')</span></span><span>'+rate(r[1])+' · <b class="'+(r[1].pr>=0?"pos":"neg")+'">'+eur(r[1].pr)+'</b></span></div>'}).join(""):'<span class="mut">Ainda sem apostas simples concluídas.</span>')+'</div>';
+  var rows=Object.keys(mk).map(function(k){return[k,agg(mk[k])]}).filter(function(r){return r[1].n}).sort(function(a,b){return b[1].pr-a[1].pr});
+  h+='<h3>Mercados (apostas simples)</h3><div class="card scr">'+(rows.length?rows.map(function(r){return '<div class="bar"><span>'+esc(r[0])+' <span class="mut">('+r[1].n+')</span></span><span>'+rate(r[1])+' · <b class="'+(r[1].pr>=0?"pos":"neg")+'">'+eur(r[1].pr)+'</b></span></div>'}).join(""):'<span class="mut">Ainda sem apostas simples concluídas.</span>')+'</div>';
+  var tm={};bs.filter(function(b){return b.legs.length===1}).forEach(function(b){var l=b.legs[0];[l.t1,l.t2].forEach(function(t){if(t){(tm[t]=tm[t]||[]).push(b)}})});
+  var tr=Object.keys(tm).map(function(k){return[k,agg(tm[k])]}).filter(function(r){return r[1].n}).sort(function(a,b){return b[1].pr-a[1].pr});
+  h+='<h3>Equipas (apostas simples)</h3><div class="card scr"><p class="mut" style="margin:0 0 6px">Apostas em jogos em que a equipa participa, da mais lucrativa para a menos.</p>'+(tr.length?tr.map(statRow).join(""):'<span class="mut">Ainda sem apostas simples concluídas.</span>')+'</div>';
   $("view").innerHTML=h;
 }
+function statRow(r){return '<div class="bar"><span>'+esc(r[0])+' <span class="mut">('+r[1].n+')</span></span><span>'+rate(r[1])+' · <b class="'+(r[1].pr>=0?"pos":"neg")+'">'+eur(r[1].pr)+'</b></span></div>'}
+function be(a){var c=a.filter(function(b){return b.status==="won"||b.status==="lost"});if(!c.length)return null;var o=c.reduce(function(s,b){return s+b.odd},0)/c.length;var w=c.filter(function(b){return b.status==="won"}).length;return{n:c.length,o:o,need:100/o,cur:w/c.length*100}}
+function pc(n){return n.toFixed(1).replace(".",",")}
+function beRow(t,r){if(!r)return '<div class="bar"><span>'+t+'</span><span class="mut">sem dados</span></div>';return '<div class="bar"><span>'+t+' <span class="mut">(odd média '+o2(r.o)+')</span></span><span>precisas de <b>'+pc(r.need)+'%</b> · tens <b class="'+(r.cur>=r.need?"pos":"neg")+'">'+pc(r.cur)+'%</b></span></div>'}
 function chart(cl){
   if(cl.length<2)return '<span class="mut">Precisas de pelo menos 2 apostas concluídas.</span>';
   var c=0,pts=[0];cl.forEach(function(b){c+=profit(b);pts.push(c)});
