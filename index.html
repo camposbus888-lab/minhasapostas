@@ -99,6 +99,10 @@ var P=function(){return S.profiles.filter(function(p){return p.id===S.cur})[0]};
 var TAB="reg",TYPE="s",SEL=null,CM={y:new Date().getFullYear(),m:new Date().getMonth()},F={team:"",market:"",min:"",max:"",res:"",sport:""},fm={stake:"",bonus:"",d:today(),sport:"Futebol"},legs=[];
 function newLegs(){legs=[{t1:"",t2:"",market:"",odd:"",sport:"Futebol"},{t1:"",t2:"",market:"",odd:"",sport:"Futebol"}]}
 newLegs();
+function backupCard(){return '<div class="card"><b>Cópia de segurança</b><p class="mut" style="margin:4px 0 8px">Exporta os teus dados para um ficheiro e importa-os noutro aparelho ou endereço.</p><div class="row"><button onclick="exportData()">Exportar</button><button onclick="$(\'imp\').click()">Importar</button></div><input id="imp" type="file" accept=".json,application/json" hidden onchange="importData(this)"></div>'}
+function exportData(){var b=new Blob([JSON.stringify(S)],{type:"application/json"});var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="apostas-"+today()+".json";document.body.appendChild(a);a.click();a.remove()}
+function importData(inp){var f=inp.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var d=JSON.parse(r.result);if(!d||!Array.isArray(d.profiles))throw 0;if(!confirm("Importar vai substituir os dados deste aparelho. Continuar?"))return;S=d;migrate();save();vmApply();app()}catch(e){alert("Ficheiro inválido.")}}
+  ;r.readAsText(f)}
 function stk(b){return S.view>0?S.view:b.stake}
 function vmLabel(){return S.view>0?"Visualização: "+S.view+" €":"Visualização"}
 function vmBanner(){return S.view>0?'<div class="vmbn">Modo visualização · todas as apostas a '+S.view+' € (valores simulados)</div>':""}
@@ -124,7 +128,7 @@ function app(){
 function homeHTML(){
   var h='<h1>Registo de <span>Apostas</span></h1><p class="mut">Escolhe um perfil ou cria o teu.</p>';
   S.profiles.forEach(function(p){h+='<button class="pf" onclick="openProfile(\''+p.id+'\')"><span>'+esc(p.name)+'</span><small>'+p.bets.length+' apostas</small></button>'});
-  return h+'<div class="card"><label>Novo perfil<input id="np" placeholder="Nome do perfil"></label><button class="pri" onclick="addProfile()">Criar perfil</button></div>';
+  return h+'<div class="card"><label>Novo perfil<input id="np" placeholder="Nome do perfil"></label><button class="pri" onclick="addProfile()">Criar perfil</button></div>'+backupCard();
 }
 function addProfile(){var n=$("np").value.trim();if(!n)return;var id="p"+Date.now();S.profiles.push({id:id,name:n,bets:[]});S.cur=id;save();TAB="reg";app()}
 function openProfile(id){S.cur=id;save();TAB="reg";SEL=null;app()}
