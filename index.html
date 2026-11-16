@@ -122,7 +122,7 @@ function dl(){var o=function(a){return a.map(function(m){return '<option value="
 
 function app(){
   if(!P()){S.cur=null;$("app").innerHTML=homeHTML();return}
-  $("app").innerHTML='<div class="topbar"><button class="back" onclick="goHome()">← Perfis</button><button class="vmb" onclick="vmToggle()">'+vmLabel()+'</button></div><div id="vmp"></div>'+vmBanner()+'<h1>'+esc(P().name)+'</h1><div class="nav" id="nav"></div><div id="view"></div>';
+  $("app").innerHTML='<div class="topbar"><button class="back" onclick="goHome()">← Perfis</button><button class="vmb" onclick="vmToggle()">'+vmLabel()+'</button></div><div id="vmp"></div>'+vmBanner()+'<h1>'+esc(P().name)+'</h1><div class="nav" id="nav"></div><div id="view"></div>'+backupCard();
   renderNav();renderView();
 }
 function homeHTML(){
