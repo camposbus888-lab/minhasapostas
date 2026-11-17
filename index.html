@@ -87,6 +87,50 @@ body.vm{--bg:#2b1a4d}body.vm .vmb{background:var(--or);color:var(--nv)}
 .legstatus label{flex:1}
 small.mono,.mono{font-variant-numeric:tabular-nums}
 @media(max-width:365px){.nav button{font-size:12px;padding:10px 2px}.stats{gap:6px}.st{padding:9px}.st b{font-size:18px}.acts{flex-wrap:wrap}}
+
+/* Campos decimais sem setas de incrementar / decrementar */
+input[type="number"]{-moz-appearance:textfield;appearance:textfield}
+input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+/* Biblioteca de gráficos HTML/SVG, sem ligação à internet */
+.gfilters{background:var(--card);border-left:6px solid var(--or);color:var(--tx);padding:12px;border-radius:8px;margin:12px 0}
+.gfilters label{font-size:12px}
+.ggroup{font-size:17px;border-bottom:1px solid #526070;padding:15px 0 5px;margin:17px 0 10px}
+.ggrid{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+.gcard{background:var(--card);color:var(--tx);border:1px solid var(--line);border-radius:9px;padding:13px;min-width:0;overflow:hidden}
+.gcard h4{font-size:15px;margin:0 0 12px;line-height:1.3}
+.gempty{font-size:13px;color:var(--mut);text-align:center;padding:30px 5px}
+.gbarrow{display:grid;grid-template-columns:minmax(80px,130px) minmax(0,1fr) 77px;gap:8px;align-items:center;margin:10px 0}
+.gbarlabel{font-size:12px;line-height:1.22;overflow-wrap:anywhere}
+.gbarlabel small{display:block;color:var(--mut);font-size:10px;margin-top:2px}
+.gbartrack{height:17px;background:#e2ded8;border-radius:4px;position:relative;overflow:hidden}
+.gbarzero{height:100%;width:1px;background:#948b7e;position:absolute;top:0;z-index:2}
+.gbarfill{height:100%;position:absolute;top:0;min-width:0;border-radius:3px}
+.gbarvalue{font-weight:700;font-size:12px;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.gdonut{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+.gdonut svg{width:165px;height:165px;flex:0 0 165px}
+.glegend{font-size:12px;flex:1;min-width:125px}
+.glegenditem{display:flex;align-items:center;gap:7px;margin:7px 0}
+.gswatch{display:inline-block;width:12px;height:12px;border-radius:3px;flex:0 0 12px}
+.glegenditem b{margin-left:auto;font-variant-numeric:tabular-nums}
+.gline{width:100%;height:auto;display:block}
+.gscroll{overflow-x:auto;padding:2px 0 8px}
+.gcolumns{display:flex;gap:9px;min-width:max-content;align-items:stretch;height:208px;border-bottom:1px solid #c9c2ba;padding:0 3px}
+.gcolumn{display:flex;flex-direction:column;align-items:center;width:57px;flex:0 0 57px}
+.gcolvalue{height:24px;font-size:10px;white-space:nowrap;font-weight:700;display:flex;align-items:flex-start}
+.gcolpositive,.gcolnegative{height:70px;display:flex;width:100%;justify-content:center}
+.gcolpositive{align-items:flex-end;border-bottom:1px dashed #b5ada3}
+.gcolnegative{align-items:flex-start}
+.gcolbar{width:26px;border-radius:4px 4px 0 0}
+.gcolnegative .gcolbar{border-radius:0 0 4px 4px}
+.gcollabel{height:37px;max-width:59px;text-align:center;font-size:10px;line-height:1.2;padding-top:6px;overflow-wrap:anywhere}
+.gdots{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:5px}
+.gdot{aspect-ratio:1/1;border-radius:5px;min-height:15px}
+.gheat{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-template-rows:repeat(7,1fr);gap:5px;grid-auto-flow:column}
+.gheat span{aspect-ratio:1/1;border-radius:4px;background:#e2ded8;min-height:12px}
+.gkey{font-size:11px;color:var(--mut);display:flex;justify-content:space-between;gap:6px;margin:9px 0 0}
+.gkey i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px}
+@media(min-width:650px){#app{max-width:900px}.ggrid{grid-template-columns:repeat(2,minmax(0,1fr))}.gwide{grid-column:1/-1}}
+@media(max-width:380px){.gbarrow{grid-template-columns:76px minmax(0,1fr) 67px;gap:5px}.gbarlabel{font-size:11px}.gbarvalue{font-size:11px}}
 </style>
 </head>
 <body>
@@ -151,7 +195,7 @@ var fdate=function(i){var p=String(i||today()).split("-");return p[2]+"/"+p[1]+"
 var MES=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 var BASE=["Resultado final (1X2)","Dupla hipótese","Mais de 2,5 golos","Menos de 2,5 golos","Ambas marcam","Handicap","Marcador","Cantos","Cartões","Outro"];
 var P=function(){return S.profiles.filter(function(p){return p.id===S.cur})[0]};
-var TAB="reg",TYPE="s",SEL=null,CM={y:new Date().getFullYear(),m:new Date().getMonth()},F={team:"",market:"",min:"",max:"",res:"",sport:"",strategy:""},fm={stake:"",bonus:"",d:today(),sport:"Futebol",strategy:""},legs=[],EDIT=null,sf={t1:"",t2:"",m:"",o:""};
+var TAB="dash",TYPE="s",SEL=null,CM={y:new Date().getFullYear(),m:new Date().getMonth()},F={team:"",market:"",min:"",max:"",res:"",sport:"",strategy:""},fm={stake:"",bonus:"",d:today(),sport:"Futebol",strategy:""},legs=[],EDIT=null,sf={t1:"",t2:"",m:"",o:""};
 var DASH_RANGE="30", COMPARE_MODE="month";
 function newLegs(){legs=[{t1:"",t2:"",market:"",odd:"",sport:"Futebol"},{t1:"",t2:"",market:"",odd:"",sport:"Futebol"}]}
 newLegs();
@@ -201,17 +245,17 @@ function homeHTML(){
   S.profiles.forEach(function(p){h+='<button class="pf" onclick="openProfile(\''+p.id+'\')"><span>'+esc(p.name)+'</span><small>'+p.bets.length+' apostas</small></button>'});
   return h+'<div class="card"><label>Novo perfil<input id="np" placeholder="Nome do perfil"></label><button class="pri" onclick="addProfile()">Criar perfil</button></div>'+backupCard();
 }
-function addProfile(){var n=$("np").value.trim();if(!n)return;var id="p"+Date.now();S.profiles.push({id:id,name:n,bets:[],bank:{initial:null,transactions:[]},strategies:[]});S.cur=id;save();TAB="reg";app()}
+function addProfile(){var n=$("np").value.trim();if(!n)return;var id="p"+Date.now();S.profiles.push({id:id,name:n,bets:[],bank:{initial:null,transactions:[]},strategies:[]});S.cur=id;save();TAB="dash";app()}
 function openProfile(id){S.cur=id;save();TAB="reg";SEL=null;app()}
 function goHome(){S.cur=null;save();app()}
 function setT(t){if(t!=="add"&&EDIT)resetForm();TAB=t;renderNav();renderView()}
 function renderNav(){
-  var t=[["dash","Painel"],["reg","Registo"],["add","Adicionar"],["st","Estatísticas"],["bank","Banca"],["strat","Estratégias"]];
+  var t=[["dash","Painel"],["reg","Registo"],["add","Adicionar"],["st","Estatísticas"],["bank","Banca"],["graphs","Gráficos"]];
   $("nav").innerHTML=t.map(function(x){return '<button class="'+(TAB===x[0]?"on":"")+'" onclick="setT(\''+x[0]+'\')">'+x[1]+'</button>'}).join("");
 }
 function renderView(){
   if(TAB==="reg"){
-    $("view").innerHTML='<div id="wl"></div><div id="cal"></div>'
+    $("view").innerHTML='<div id="cal"></div>'
     +'<details class="card"><summary>Filtros</summary><div class="filters" style="margin-top:8px">'
     +'<input placeholder="Equipa" value="'+esc(F.team)+'" oninput="F.team=this.value;refresh()">'
     +'<select onchange="F.market=this.value;refresh()"><option value="">Todos os mercados</option>'+markets().map(function(m){return '<option'+(F.market===m?" selected":"")+'>'+esc(m)+'</option>'}).join("")+'</select>'
@@ -221,9 +265,9 @@ function renderView(){
     +'<select style="grid-column:1/3" onchange="F.res=this.value;refresh()">'+[["","Todos os resultados"],["open","Em aberto"],["won","Ganhas"],["lost","Perdidas"],["void","Anuladas"],["partial","Parciais"],["cashout","Cash out"]].map(function(r){return '<option value="'+r[0]+'"'+(F.res===r[0]?" selected":"")+'>'+r[1]+'</option>'}).join("")+'</select>'
     +'<select style="grid-column:1/3" onchange="F.strategy=this.value;refresh()"><option value="">Todas as estratégias</option>'+(P().strategies||[]).map(function(s){return '<option value="'+esc(s)+'"'+(F.strategy===s?' selected':'')+'>'+esc(s)+'</option>'}).join('')+'</select>'+'</div></details><h3 id="lt"></h3><div id="list"></div>';
     refresh();
-  }else if(TAB==="add"){addView()}else if(TAB==="st"){statsView()}else if(TAB==="dash"){dashboardView()}else if(TAB==="bank"){bankView()}else if(TAB==="strat"){strategiesView()}
+  }else if(TAB==="add"){addView()}else if(TAB==="st"){statsView()}else if(TAB==="dash"){dashboardView()}else if(TAB==="bank"){bankView()}else if(TAB==="graphs"){graphsView()}
 }
-function refresh(){renderWL();renderCal();renderList()}
+function refresh(){renderCal();renderList()}
 function vis(){
   var t=F.team.trim().toLowerCase();
   return P().bets.filter(function(b){
@@ -321,6 +365,7 @@ function addView(){
   h+='<div class="row"><label>Valor (€)<input id="stake" type="number" inputmode="decimal" step="0.01" value="'+esc(fm.stake)+'" oninput="fm.stake=this.value;calc()"></label><label>Bónus %<input id="bonus" type="number" inputmode="decimal" step="0.1" placeholder="0" value="'+esc(fm.bonus)+'" oninput="fm.bonus=this.value;calc()"></label></div>'
   +'<label>Data<input id="dt" type="date" value="'+fm.d+'" onchange="fm.d=this.value"></label>'
   +'<div class="final"><span>Odd final <b class="or" id="fin">—</b></span><span>Retorno <b id="ret">—</b></span></div><button class="pri" onclick="saveBet()">'+(EDIT?"Guardar alterações":"Guardar aposta")+'</button></div>'+dl();
+  h+='<details class="card" id="stratMgmt"><summary>Gerir etiquetas das estratégias</summary><div id="strategy_manager">'+strategyManagerHTML()+'</div></details>';
   $("view").innerHTML=h;
   if(TYPE==="m")renderLegs();
   calc();
@@ -426,7 +471,7 @@ function statsView(){
   +'<div class="st"><b>'+avg(bs.filter(function(b){return b.status==="won"}))+' / '+avg(bs.filter(function(b){return b.status==="lost"}))+'</b><span>Odd média ganhas / perdidas</span></div></div>';
   var B=bankSnapshot(P());
   h+='<h3>Banca real</h3><div class="card">'+(B.configured?'<div class="final"><span>Inicial <b>'+eur(B.initial)+'</b></span><span>Património de aposta* <b class="'+pctClass(B.equity-B.initial)+'">'+eur(B.equity)+'</b></span></div><div class="bar"><span>Disponível</span><b>'+eur(B.available)+'</b></div><div class="bar"><span>Em apostas abertas</span><b>'+eur(B.committed)+'</b></div><p class="metric-note">*Disponível + valor apostado que ainda está em aberto, sem prever ganhos. Depósitos e levantamentos são movimentos da banca, não lucro.</p>':'<p class="mut">Ainda não definiste a banca inicial. Configura-a no separador Banca.</p>')+'</div>';
-  h+='<h3>Lucro acumulado nas apostas</h3><div class="card">'+chart(cl,0)+'</div>';
+  
   var mw=0,ml=0,rw=0,rl=0,cu=0,pk=0,dd=0,ddp=0;
   cl.forEach(function(b){if(profit(b)>0){rw++;rl=0}else{rl++;rw=0}mw=Math.max(mw,rw);ml=Math.max(ml,rl);cu+=profit(b);if(cu>pk)pk=cu;var q=pk-cu;if(q>dd){dd=q;ddp=pk>0?q/pk*100:0}});
   h+='<h3>Séries e quebra máxima</h3><div class="card"><div class="bar"><span>Maior série de ganhas</span><b class="pos">'+mw+'</b></div><div class="bar"><span>Maior série de perdidas</span><b class="neg">'+ml+'</b></div><div class="bar"><span>Maior queda do lucro acumulado</span><span><b class="neg">'+eur(-dd)+'</b>'+(ddp?' · '+pc(ddp)+'%':"")+'</span></div></div>';
@@ -489,9 +534,6 @@ function dashboardView(){
     +'</div><p class="mut">Os períodos referem-se à data da aposta. '+(S.view>0?'Valores de apostas simulados, exceto a banca real.':'Resultados reais registados.')+'</p>';
   var s=sortedBets(chosen.filter(closed));
   h+='<h3>Evolução do lucro no período</h3><div class="card">'+chart(s,0)+'</div>';
-  var dmap={},smap={};chosen.filter(closed).forEach(function(x){var d=bdate(x),m=d.slice(0,7);dmap[d]=(dmap[d]||0)+profit(x);smap[m]=(smap[m]||0)+profit(x)});
-  var dr=Object.keys(dmap).sort().reverse().slice(0,7).map(function(d){return [fdate(d),dmap[d]]});
-  h+='<h3>Últimos dias com resultados</h3><div class="card">'+miniBars(dr)+'</div>';
   var categories={};chosen.forEach(function(x){var k=x.strategy||"Sem estratégia";(categories[k]=categories[k]||[]).push(x)});
   var stratRows=Object.keys(categories).map(function(k){return[k,agg(categories[k])]}).filter(function(x){return x[1].n>0}).sort(function(x,y){return y[1].pr-x[1].pr});
   h+='<h3>Estratégias no período</h3><div class="card">'+(stratRows.length?stratRows.map(function(x){return '<div class="bar"><span>'+esc(x[0])+' <small class="mut">('+x[1].n+')</small></span><span class="'+pctClass(x[1].pr)+'"><b>'+eur(x[1].pr)+'</b> · '+formatPct(roi(x[1]))+'</span></div>'}).join(''):'<p class="mut">Ainda não há estratégias com apostas concluídas neste período.</p>')+'</div>';
@@ -529,7 +571,7 @@ function bankView(){
       +statMetric('Depósitos',eur(B.deposits))+statMetric('Levantamentos',eur(B.withdrawals))+'</div><p class="mut">*As apostas abertas contam pelo valor apostado, não pelo retorno possível. Não representa uma avaliação de mercado.</p>';
     if(B.available<0)h+='<p class="vmbn">Atenção: o saldo disponível é negativo. Confirma movimentos e apostas registados.</p>';
     h+='<h3>Movimentos de banca</h3><div class="card"><div class="row"><label>Tipo<select id="tx_type"><option value="deposit">Depósito</option><option value="withdraw">Levantamento</option></select></label><label>Valor (€)<input id="tx_amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="20,00"></label></div><div class="row"><label>Data<input id="tx_date" type="date" value="'+today()+'"></label><label>Nota<input id="tx_note" placeholder="Opcional"></label></div><button class="pri" onclick="addBankTransaction()">Registar movimento</button></div>';
-    h+='<h3>Evolução do saldo disponível</h3><div class="card">'+moneyGraph(curve,B.initial)+'</div>';
+    
     var ts=b.transactions.slice().sort(function(x,y){return (y.date||'').localeCompare(x.date||'')}).slice(0,50);
     h+='<h3>Histórico de depósitos e levantamentos</h3><div class="card">'+(ts.length?ts.map(function(t){return '<div class="bar"><span>'+fdate(t.date)+' · '+(t.type==='deposit'?'Depósito':'Levantamento')+(t.note?' · '+esc(t.note):'')+'</span><span><b class="'+(t.type==='deposit'?'pos':'neg')+'">'+(t.type==='deposit'?'+':'−')+eur(t.amount)+'</b> <button onclick="removeBankTransaction(\''+t.id+'\')" aria-label="Apagar movimento">✕</button></span></div>'}).join(''):'<p class="mut">Ainda não existem movimentos.</p>')+'</div>';
   }else h+='<p class="mut">Podes continuar a registar apostas, mas os saldos reais aparecerão depois de definires a banca inicial.</p>';
@@ -543,18 +585,15 @@ function addBankTransaction(){
   p.bank.transactions.push({id:'t'+Date.now()+Math.random().toString(36).slice(2,6),type:type,amount:money(amount),date:date,note:note});save();bankView();
 }
 function removeBankTransaction(id){if(!confirm('Apagar este movimento?'))return;P().bank.transactions=P().bank.transactions.filter(function(x){return x.id!==id});save();bankView()}
-function strategiesView(){
-  var p=P(),groups={};p.bets.forEach(function(b){var k=b.strategy||'Sem estratégia';(groups[k]=groups[k]||[]).push(b)});
-  var h='<h3>Estratégias personalizadas</h3><div class="card"><label>Nome da estratégia<input id="new_strategy" maxlength="70" placeholder="Ex.: Mais de 2,5 golos"></label><button class="pri" onclick="addStrategy()">Criar estratégia</button><p class="metric-note">Associa cada aposta a uma estratégia no separador Adicionar. Podes filtrar o Registo por estratégia.</p></div>';
-  h+='<h3>Desempenho por estratégia</h3><div class="card">';
-  var names=(p.strategies||[]).slice();if(groups['Sem estratégia'])names.push('Sem estratégia');
-  h+=names.length?names.map(function(s,i){var a=agg(groups[s]||[]),count=(groups[s]||[]).length;return '<div style="border-bottom:1px solid var(--line);padding:10px 0"><b>'+esc(s)+'</b><p class="metric-note">'+count+' apostas · '+a.n+' concluídas com resultado · '+rate(a)+' com lucro</p><div class="bar"><span>Resultado <b class="'+pctClass(a.pr)+'">'+eur(a.pr)+'</b></span><span>ROI '+formatPct(roi(a))+'</span></div>'+(s==='Sem estratégia'?'':'<div class="acts"><button onclick="renameStrategy('+i+')">Renomear</button><button onclick="deleteStrategy('+i+')">Apagar</button></div>')+'</div>'}).join(''):'<p class="mut">Ainda não tens estratégias criadas.</p>';
-  h+='</div><p class="mut">As estatísticas não provam rentabilidade futura; verifica também a quantidade de apostas em cada grupo.</p>';
-  $("view").innerHTML=h;
+function strategyManagerHTML(){
+  var p=P();return '<p class="metric-note">Podes continuar a associar estratégias às apostas e filtrá-las no Registo.</p>'+
+    '<label>Nova estratégia<input id="new_strategy" maxlength="70" placeholder="Ex.: Mais de 2,5 golos"></label><button class="pri" onclick="addStrategy()">Criar estratégia</button>'+
+    (p.strategies||[]).map(function(x,i){return '<div class="bar"><span>'+esc(x)+'</span><span><button onclick="renameStrategy('+i+')">Editar</button> <button onclick="deleteStrategy('+i+')">✕</button></span></div>'}).join('');
 }
-function addStrategy(){var v=$("new_strategy").value.trim(),p=P();if(!v)return alert('Introduz um nome.');if(p.strategies.some(function(s){return s.toLowerCase()===v.toLowerCase()}))return alert('Essa estratégia já existe.');p.strategies.push(v);save();strategiesView()}
-function renameStrategy(i){var p=P(),old=p.strategies[i];if(!old)return;var v=prompt('Novo nome:',old);if(v===null)return;v=v.trim();if(!v||p.strategies.some(function(s){return s!==old&&s.toLowerCase()===v.toLowerCase()}))return alert('Nome inválido ou duplicado.');p.strategies[i]=v;p.bets.forEach(function(b){if(b.strategy===old)b.strategy=v});save();strategiesView()}
-function deleteStrategy(i){var p=P(),old=p.strategies[i];if(!old)return;if(!confirm('Apagar a estratégia "'+old+'"? As apostas ficam preservadas, mas sem esta etiqueta.'))return;p.strategies.splice(i,1);p.bets.forEach(function(b){if(b.strategy===old)b.strategy=''});save();strategiesView()}
+function renderStrategyManager(){var x=$("strategy_manager");if(x)x.innerHTML=strategyManagerHTML()}
+function addStrategy(){var node=$("new_strategy"),v=(node?node.value:"").trim(),p=P();if(!v)return alert('Introduz um nome.');if(p.strategies.some(function(s){return s.toLowerCase()===v.toLowerCase()}))return alert('Essa estratégia já existe.');p.strategies.push(v);save();renderStrategyManager()}
+function renameStrategy(i){var p=P(),old=p.strategies[i];if(!old)return;var v=prompt('Novo nome:',old);if(v===null)return;v=v.trim();if(!v||p.strategies.some(function(s){return s!==old&&s.toLowerCase()===v.toLowerCase()}))return alert('Nome inválido ou duplicado.');p.strategies[i]=v;p.bets.forEach(function(b){if(b.strategy===old)b.strategy=v});save();renderStrategyManager()}
+function deleteStrategy(i){var p=P(),old=p.strategies[i];if(!old)return;if(!confirm('Apagar a estratégia "'+old+'"? As apostas ficam preservadas, mas sem esta etiqueta.'))return;p.strategies.splice(i,1);p.bets.forEach(function(b){if(b.strategy===old)b.strategy=''});save();renderStrategyManager()}
 function tableMetrics(rows){
   if(!rows.length)return '<p class="mut">Ainda não há dados suficientes.</p>';
   return '<div class="scroll-table"><table class="tbl"><thead><tr><th>Grupo</th><th>Apostas</th><th>Lucro %</th><th>Lucro (€)</th><th>ROI</th></tr></thead><tbody>'+rows.map(function(r){var a=r[1];return '<tr><td>'+esc(r[0])+'</td><td>'+a.n+'</td><td>'+rate(a)+'</td><td class="'+pctClass(a.pr)+'">'+eur(a.pr)+'</td><td class="'+pctClass(a.pr)+'">'+formatPct(roi(a))+'</td></tr>'}).join('')+'</tbody></table></div>';
@@ -602,6 +641,155 @@ function comparisonHTML(){
     +'<tr><td>Odd média</td><td>'+avg(d.firstB)+'</td><td>'+avg(d.secondB)+'</td></tr></tbody></table></div>'
     +'<p class="metric-note">Diferença de lucro: <b class="'+pctClass(delta)+'">'+(delta>0?'+':'')+eur(delta)+'</b>. Contagem por data da aposta, não da liquidação. A janela atual pode estar incompleta.</p></div>';
   return h;
+}
+
+
+/* ---- Separador Gráficos: apenas visualizações, sem tabelas ---- */
+var GRAPH_RANGE="all", GRAPH_KIND="all";
+var GC={green:"#1f9d55",red:"#d93a3a",orange:"#f59e2a",blue:"#4981c8",purple:"#8b63bd",gray:"#a9a6a0",teal:"#11a0a0"};
+function graphRange(v){GRAPH_RANGE=v;graphsView()}
+function graphKind(v){GRAPH_KIND=v;graphsView()}
+function graphCompare(v){COMPARE_MODE=v;graphsView()}
+function gFmt(v,kind){if(kind==="eur")return (v>0?"+":"")+eur(v);if(kind==="pct")return (v>0?"+":"")+pc(v)+"%";if(kind==="odd")return o2(v);return String(Math.round(v))}
+function gCard(title,inner,wide){return '<section class="gcard'+(wide?' gwide':'')+'"><h4>'+esc(title)+'</h4>'+inner+'</section>'}
+function gEmpty(msg){return '<div class="gempty">'+esc(msg||'Ainda não existem dados suficientes.')+'</div>'}
+function gBar(rows,kind){
+  rows=rows.filter(function(x){return Number.isFinite(x.value)});
+  if(!rows.length)return gEmpty();
+  var lo=Math.min.apply(null,rows.map(function(x){return x.value}).concat([0])),hi=Math.max.apply(null,rows.map(function(x){return x.value}).concat([0]));
+  var span=Math.max(hi-lo,0.000001),zero=-lo/span*100;
+  return rows.map(function(x){var left=x.value>=0?zero:zero+x.value/span*100,width=Math.abs(x.value)/span*100;
+    return '<div class="gbarrow" title="'+esc(x.label+': '+gFmt(x.value,kind)+(x.count!==undefined?' · '+x.count+' apostas':''))+'">'
+    +'<div class="gbarlabel">'+esc(x.label)+(x.count===undefined?'':'<small>'+x.count+' apostas</small>')+'</div>'
+    +'<div class="gbartrack"><i class="gbarzero" style="left:'+zero.toFixed(3)+'%"></i>'+(width?'<i class="gbarfill" style="left:'+left.toFixed(3)+'%;width:'+width.toFixed(3)+'%;background:'+(x.value>=0?GC.green:GC.red)+'"></i>':'')+'</div>'
+    +'<div class="gbarvalue '+(x.value>=0?'pos':'neg')+'">'+esc(gFmt(x.value,kind))+'</div></div>';}).join('');
+}
+function gColumns(rows,kind){
+  rows=rows.filter(function(x){return Number.isFinite(x.value)});
+  if(!rows.length)return gEmpty();
+  var max=Math.max.apply(null,rows.map(function(x){return Math.abs(x.value)}).concat([0.000001]));
+  return '<div class="gscroll"><div class="gcolumns">'+rows.map(function(x){var h=Math.max(0,Math.min(70,Math.abs(x.value)/max*70));
+     return '<div class="gcolumn" title="'+esc(x.label+': '+gFmt(x.value,kind))+'"><div class="gcolvalue '+(x.value>=0?'pos':'neg')+'">'+esc(gFmt(x.value,kind))+'</div>'
+        +'<div class="gcolpositive">'+(x.value>0?'<div class="gcolbar" style="height:'+h+'px;background:'+GC.green+'"></div>':'')+'</div>'
+        +'<div class="gcolnegative">'+(x.value<0?'<div class="gcolbar" style="height:'+h+'px;background:'+GC.red+'"></div>':'')+'</div>'
+        +'<div class="gcollabel">'+esc(x.label)+'</div></div>';
+  }).join('')+'</div></div>';
+}
+function gDonut(rows){
+  rows=rows.filter(function(r){return r.value>0});if(!rows.length)return gEmpty();
+  var total=rows.reduce(function(s,r){return s+r.value},0),circ=2*Math.PI*61,pos=0;
+  var circles=rows.map(function(r,i){var length=r.value/total*circ,off=pos;pos+=length;
+    return '<circle cx="86" cy="86" r="61" fill="none" stroke="'+(r.color||GC.orange)+'" stroke-width="22" stroke-dasharray="'+length.toFixed(3)+' '+(circ-length).toFixed(3)+'" stroke-dashoffset="'+(-off).toFixed(3)+'" transform="rotate(-90 86 86)"><title>'+esc(r.label+': '+r.value+' ('+pc(r.value/total*100)+'%)')+'</title></circle>';
+  }).join('');
+  return '<div class="gdonut"><svg viewBox="0 0 172 172" role="img" aria-label="Distribuição de '+total+' resultados">'
+   +'<circle cx="86" cy="86" r="61" fill="none" stroke="#e2ded8" stroke-width="22"/>'+circles
+   +'<text x="86" y="83" text-anchor="middle" font-size="23" font-weight="700" fill="#0e1a2b">'+total+'</text><text x="86" y="102" text-anchor="middle" font-size="11" fill="#6b7280">registos</text></svg>'
+   +'<div class="glegend">'+rows.map(function(r){return '<div class="glegenditem"><span class="gswatch" style="background:'+(r.color||GC.orange)+'"></span><span>'+esc(r.label)+'</span><b>'+r.value+'</b></div>'}).join('')+'</div></div>';
+}
+function gLine(values,labels,kind,col){
+  if(values.length<2)return gEmpty('São precisos dois ou mais pontos para o gráfico de evolução.');
+  var src=values,lab=labels||[],maxPoints=160;
+  if(src.length>maxPoints){var ids=[];for(var i=0;i<maxPoints;i++)ids.push(Math.round(i*(src.length-1)/(maxPoints-1)));values=ids.map(function(i){return src[i]});lab=ids.map(function(i){return labels[i]})}
+  var W=560,H=208,L=50,R=14,T=14,B=29,vmin=Math.min.apply(null,values.concat([0])),vmax=Math.max.apply(null,values.concat([0]));
+  if(vmin===vmax){vmin-=1;vmax+=1}var pad=(vmax-vmin)*0.08;vmin-=pad;vmax+=pad;
+  var x=function(i){return L+(W-L-R)*i/(values.length-1)},y=function(v){return H-B-(H-T-B)*(v-vmin)/(vmax-vmin)};
+  var p=values.map(function(v,i){return(i?'L':'M')+x(i).toFixed(2)+' '+y(v).toFixed(2)}).join(' ');
+  var grid=[vmin,(vmin+vmax)/2,vmax].map(function(v){return '<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="#d5d1cb" stroke-dasharray="3 4"/><text x="'+(L-5)+'" y="'+(y(v)+3)+'" text-anchor="end" fill="#6b7280" font-size="11">'+esc(kind==='eur'?o2(v):kind==='pct'?pc(v)+'%':String(Math.round(v)))+'</text>'}).join('');
+  var mark=[0,Math.floor((values.length-1)/2),values.length-1].map(function(i){return '<text x="'+x(i)+'" y="'+(H-7)+'" text-anchor="middle" fill="#6b7280" font-size="11">'+esc(String(lab[i]||i+1).slice(0,15))+'</text>'}).join('');
+  return '<svg class="gline" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Gráfico de evolução">'+grid+'<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(0)+'" y2="'+y(0)+'" stroke="#bcb7b0" stroke-width="1.3"/>'
+   +'<path d="'+p+'" stroke="'+(col||GC.orange)+'" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round" fill="none"/>'
+   +'<circle cx="'+x(values.length-1)+'" cy="'+y(values[values.length-1])+'" r="4" fill="'+(col||GC.orange)+'"><title>'+esc(gFmt(values[values.length-1],kind))+'</title></circle>'+mark+'</svg>';
+}
+function gRecent(bets){
+  if(!bets.length)return gEmpty();
+  var a=sortedBets(bets).slice(-84);return '<div class="gdots">'+a.map(function(b){var c=b.status==='void'?GC.gray:profit(b)>0?GC.green:profit(b)<0?GC.red:GC.orange;
+    return '<span class="gdot" style="background:'+c+'" title="'+esc(fdate(bdate(b))+' · '+gFmt(profit(b),'eur'))+'"></span>'}).join('')+'</div><div class="gkey"><span><i style="background:'+GC.green+'"></i>Lucro</span><span><i style="background:'+GC.red+'"></i>Prejuízo</span><span><i style="background:'+GC.gray+'"></i>Anulada</span></div>';
+}
+function gHeatmap(bets){
+  if(!bets.length)return gEmpty();
+  var map={};bets.forEach(function(b){var d=bdate(b);map[d]=(map[d]||0)+profit(b)});
+  var cells=[],max=Math.max.apply(null,Object.keys(map).map(function(d){return Math.abs(map[d])}).concat([1]));
+  var end=new Date();end.setHours(12,0,0,0);end.setDate(end.getDate()+6-((end.getDay()+6)%7)); // domingo desta semana
+  var start=new Date(end);start.setDate(end.getDate()-83);
+  for(var i=0;i<84;i++){var d=new Date(start);d.setDate(start.getDate()+i);var key=iso(d),v=map[key],intensity=v===undefined?0:Math.max(0.22,Math.min(1,Math.abs(v)/max)),color=v===undefined?'#e2ded8':v>=0?'rgba(31,157,85,'+intensity.toFixed(2)+')':'rgba(217,58,58,'+intensity.toFixed(2)+')';
+    cells.push('<span style="background:'+color+'" title="'+esc(fdate(key)+': '+(v===undefined?'sem apostas concluídas':gFmt(v,'eur')))+'"></span>')}
+  return '<div class="gheat">'+cells.join('')+'</div><div class="gkey"><span>Há 12 semanas</span><span>Hoje →</span></div><div class="gkey"><span><i style="background:'+GC.red+'"></i>Prejuízo</span><span><i style="background:#e2ded8"></i>Sem registos</span><span><i style="background:'+GC.green+'"></i>Lucro</span></div>';
+}
+function gGroup(title,items){return '<h3 class="ggroup">'+title+'</h3><div class="ggrid">'+items.join('')+'</div>'}
+function graphsView(){
+  var all=P().bets,bs=all.filter(function(b){return inRange(b,GRAPH_RANGE)&&(GRAPH_KIND==='all'||(GRAPH_KIND==='single'?b.legs.length===1:b.legs.length>1))}),settled=sortedBets(bs.filter(closed)),decided=bs.filter(function(b){return closed(b)&&b.status!=='void'}),a=agg(bs);
+  var ranges=[["7","7 dias"],["30","30 dias"],["90","90 dias"],["365","365 dias"],["all","Tudo"]],types=[["all","Todas"],["single","Simples"],["multi","Múltiplas"]];
+  var head='<h3>Galeria de gráficos</h3><div class="gfilters"><label>Período</label><div class="pillrow">'+ranges.map(function(r){return '<button class="'+(GRAPH_RANGE===r[0]?'on':'')+'" onclick="graphRange(\''+r[0]+'\')">'+r[1]+'</button>'}).join('')+'</div><label>Tipo de aposta</label><div class="pillrow">'+types.map(function(r){return '<button class="'+(GRAPH_KIND===r[0]?'on':'')+'" onclick="graphKind(\''+r[0]+'\')">'+r[1]+'</button>'}).join('')+'</div></div>';
+  if(!bs.length){$("view").innerHTML=head+gEmpty('Não existem apostas para estes filtros.');return}
+  var groups=[],cumulative=[0],drawdown=[0],labels=['Início'],peak=0,cum=0;
+  settled.forEach(function(b){cum+=profit(b);peak=Math.max(peak,cum);cumulative.push(money(cum));drawdown.push(money(cum-peak));labels.push(fdate(bdate(b)))});
+  // grupos mensais, dias da semana e categorias
+  var byMonth={},byDay={},bySport={},byMarket={},byTeam={},byStrat={},bySize={};
+  var weekdays=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+  bs.forEach(function(b){
+    var m=bdate(b).slice(0,7),dt=bdate(b).split('-'),wd=(new Date(+dt[0],+dt[1]-1,+dt[2]).getDay()+6)%7;
+    (byMonth[m]=byMonth[m]||[]).push(b);(byDay[wd]=byDay[wd]||[]).push(b);
+    var sp=b.legs.map(function(l){return l.sport||'Futebol'}),sport=sp.every(function(x){return x===sp[0]})?sp[0]:'Misto';
+    (bySport[sport]=bySport[sport]||[]).push(b);
+    if(b.legs.length===1){var l=b.legs[0];(byMarket[l.market||'Sem mercado']=byMarket[l.market||'Sem mercado']||[]).push(b);
+      [l.t1,l.t2].forEach(function(t){if(t)(byTeam[t]=byTeam[t]||[]).push(b)})}
+    (byStrat[b.strategy||'Sem estratégia']=byStrat[b.strategy||'Sem estratégia']||[]).push(b);
+    if(b.legs.length>1)(bySize[b.legs.length]=bySize[b.legs.length]||[]).push(b);
+  });
+  var monthRows=Object.keys(byMonth).sort().slice(-12).map(function(k){return {label:k.slice(5)+'/'+k.slice(2,4),value:money(agg(byMonth[k]).pr)}});
+  var dayRows=weekdays.map(function(n,i){return {label:n,value:money(agg(byDay[i]||[]).pr)}});
+  var dayRoi=weekdays.map(function(n,i){var r=agg(byDay[i]||[]);return r.n?{label:n,value:roi(r),count:r.n}:null}).filter(Boolean);
+  var outcome=[['Ganhas',GC.green,bs.filter(function(b){return b.status==='won'}).length],['Perdidas',GC.red,bs.filter(function(b){return b.status==='lost'}).length],['Parciais',GC.orange,bs.filter(function(b){return b.status==='partial'}).length],['Cash out',GC.blue,bs.filter(function(b){return b.status==='cashout'}).length],['Anuladas',GC.gray,bs.filter(function(b){return b.status==='void'}).length],['Em aberto',GC.purple,bs.filter(function(b){return b.status==='open'}).length]].map(function(x){return {label:x[0],color:x[1],value:x[2]}});
+  groups.push(gGroup('Desempenho ao longo do tempo',[
+    gCard('Lucro acumulado',gLine(cumulative,labels,'eur',GC.orange),true),
+    gCard('Queda face ao máximo anterior (drawdown)',gLine(drawdown,labels,'eur',GC.red),true),
+    gCard('Lucro por mês (até 12 meses)',gColumns(monthRows,'eur')),
+    gCard('Lucro por dia da semana',gColumns(dayRows,'eur')),
+    gCard('ROI por dia da semana',gBar(dayRoi,'pct')),
+    gCard('Resultados das apostas',gDonut(outcome)),
+    gCard('Últimas 84 apostas concluídas',gRecent(settled)),
+    gCard('Mapa diário de lucro/prejuízo (12 semanas)',gHeatmap(settled),true)
+  ]));
+  var bins=[['1,01–1,49',1,1.5],['1,50–1,99',1.5,2],['2,00–2,49',2,2.5],['2,50–2,99',2.5,3],['3,00+',3,Infinity]],binsData=bins.map(function(x){var a=bs.filter(function(b){return b.odd>=x[1]&&b.odd<x[2]}),r=agg(a);return {label:x[0],all:a.length,stats:r}});
+  groups.push(gGroup('Odds e valores das apostas',[
+    gCard('Lucro por intervalo de odds',gBar(binsData.filter(function(x){return x.stats.n}).map(function(x){return {label:x.label,value:money(x.stats.pr),count:x.stats.n}}),'eur')),
+    gCard('ROI por intervalo de odds',gBar(binsData.filter(function(x){return x.stats.n}).map(function(x){return {label:x.label,value:roi(x.stats),count:x.stats.n}}),'pct')),
+    gCard('Apostas com lucro por intervalo de odds',gBar(binsData.filter(function(x){return x.stats.n}).map(function(x){return {label:x.label,value:x.stats.w/x.stats.n*100,count:x.stats.n}}),'pct')),
+    gCard('Distribuição das odds registadas',gDonut(binsData.map(function(x,i){return {label:x.label,value:x.all,color:[GC.orange,GC.blue,GC.green,GC.purple,GC.teal][i]}})))
+  ]));
+  var stakeBreaks=[['Até 5 €',0,5.001],['5–10 €',5.001,10.001],['10–20 €',10.001,20.001],['20–50 €',20.001,50.001],['50–100 €',50.001,100.001],['Mais de 100 €',100.001,Infinity]];
+  groups.push(gGroup('Mercados e características',[
+    gCard('Distribuição dos valores apostados',gColumns(stakeBreaks.map(function(x){return {label:x[0],value:bs.filter(function(b){return b.stake>=x[1]&&b.stake<x[2]}).length}}),'count')),
+    gCard('ROI: simples e múltiplas',gBar([['Simples',bs.filter(function(b){return b.legs.length===1})],['Múltiplas',bs.filter(function(b){return b.legs.length>1})]].map(function(x){var r=agg(x[1]);return r.n?{label:x[0],value:roi(r),count:r.n}:null}).filter(Boolean),'pct')),
+    gCard('Lucro por desporto',gBar(Object.keys(bySport).map(function(k){var r=agg(bySport[k]);return {label:k,value:money(r.pr),count:r.n}}).filter(function(x){return x.count}).sort(function(x,y){return y.value-x.value}).slice(0,9),'eur')),
+    gCard('Lucro por mercado (apostas simples)',gBar(Object.keys(byMarket).map(function(k){var r=agg(byMarket[k]);return {label:k,value:money(r.pr),count:r.n}}).filter(function(x){return x.count}).sort(function(x,y){return y.value-x.value}).slice(0,10),'eur')),
+    gCard('Lucro por equipa (apostas simples)',gBar(Object.keys(byTeam).map(function(k){var r=agg(byTeam[k]);return {label:k,value:money(r.pr),count:r.n}}).filter(function(x){return x.count}).sort(function(x,y){return y.value-x.value}).slice(0,10),'eur')),
+    gCard('Lucro por estratégia',gBar(Object.keys(byStrat).map(function(k){var r=agg(byStrat[k]);return {label:k,value:money(r.pr),count:r.n}}).filter(function(x){return x.count}).sort(function(x,y){return y.value-x.value}).slice(0,10),'eur'))
+  ]));
+  var multiple=bs.filter(function(b){return b.legs.length>1}),byLeg={open:0,won:0,lost:0,void:0,halfwon:0,halflost:0};multiple.forEach(function(b){b.legs.forEach(function(l){var k=l.result||'open';if(byLeg[k]!==undefined)byLeg[k]++})});
+  var sizeRows=Object.keys(bySize).sort(function(x,y){return +x-+y}).map(function(k){var r=agg(bySize[k]);return {label:k+' sel.',value:money(r.pr),count:r.n}}).filter(function(x){return x.count});
+  groups.push(gGroup('Apostas múltiplas',[
+    gCard('Lucro por número de seleções',gBar(sizeRows,'eur')),
+    gCard('ROI por número de seleções',gBar(sizeRows.map(function(x){var r=agg(bySize[parseInt(x.label,10)]);return {label:x.label,value:roi(r),count:r.n}}),'pct')),
+    gCard('Estado individual das seleções',gDonut([['Ganhas','won',GC.green],['Perdidas','lost',GC.red],['Anuladas','void',GC.gray],['Meia ganha','halfwon',GC.orange],['Meia perdida','halflost',GC.purple],['Por indicar','open',GC.blue]].map(function(x){return {label:x[0],value:byLeg[x[1]],color:x[2]}})))
+  ]));
+  var bank=bankSnapshot(P());if(bank.configured){
+    var events=ledgerEvents(P()),v=bank.initial,series=[v],dates=['Inicial'];events.forEach(function(x){v+=x.amount;series.push(money(v));dates.push(fdate(x.date))});
+    var tx=(P().bank.transactions||[]).filter(function(t){return GRAPH_RANGE==='all'||t.date>=dateOffset(+GRAPH_RANGE-1)});
+    var dep=tx.filter(function(t){return t.type==='deposit'}).reduce(function(s,t){return s+ +t.amount},0),withd=tx.filter(function(t){return t.type==='withdraw'}).reduce(function(s,t){return s+ +t.amount},0);
+    groups.push(gGroup('Banca real',[
+      gCard('Saldo disponível ao longo dos movimentos',gLine(series,dates,'eur',GC.orange),true),
+      gCard('Depósitos e levantamentos (período selecionado)',gColumns([{label:'Depósitos',value:money(dep)},{label:'Levantamentos',value:-money(withd)}],'eur'))
+    ]));
+  }
+  if(GRAPH_KIND==='all'){
+    var compares=[["month","Este mês / anterior"],["30","30 dias / anteriores"],["100","100 apostas / anteriores"]];
+    var cd=comparisonData();
+    groups.push('<h3 class="ggroup">Comparação de períodos</h3><div class="gfilters"><label>Escolher períodos<select onchange="graphCompare(this.value)">'+compares.map(function(x){return '<option value="'+x[0]+'"'+(COMPARE_MODE===x[0]?' selected':'')+'>'+x[1]+'</option>'}).join('')+'</select></label></div><div class="ggrid">'+
+     gCard('Lucro: períodos comparados',gBar([{label:cd.firstLabel,value:money(cd.first.pr)},{label:cd.secondLabel,value:money(cd.second.pr)}],'eur'))+
+     gCard('ROI: períodos comparados',gBar([{label:cd.firstLabel,value:roi(cd.first)},{label:cd.secondLabel,value:roi(cd.second)}].filter(function(x){return Number.isFinite(x.value)}),'pct'))+'</div>');
+  }
+  $("view").innerHTML=head+groups.join('');
 }
 
 vmApply();app();
