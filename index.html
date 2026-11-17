@@ -201,6 +201,24 @@ h3{font-size:15px;margin:12px 0 7px}
 .card .ln{font-size:13px;gap:8px}.card .ln span{min-width:0;overflow-wrap:anywhere}
 @media(max-width:370px){.st b{font-size:17px}.app-brand small{display:none}.page-heading h2{font-size:19px}.action-btn{font-size:12px;padding:8px}}
 @media(min-width:650px){.ggrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Resumo de greens no painel inicial */
+.green-calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;margin-top:10px}
+.green-calendar .weekday{text-align:center;color:#687386;font-size:11px;font-weight:700}
+.green-day{min-width:0;min-height:47px;border:1px solid #ddd8d1;border-radius:7px;background:#eeeae5;color:#14243a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:3px 1px;font-size:12px;cursor:pointer}
+.green-day .daynum{font-weight:700}.green-day small{font-size:10px;font-weight:700}
+.green-day.day-win{background:#d7f2df;border-color:#6ecb8a;color:#146536}
+.green-day.day-loss{background:#f9dede;border-color:#e59a9a;color:#9b2727}
+.green-day.day-even{background:#fceac9;border-color:#e7b96e;color:#82560c}
+.green-day.day-open{background:#fff4dc;border-color:#e9c88a;color:#805d17}
+.green-day.day-today{outline:2px solid #f59e2a;outline-offset:1px}
+.green-day:focus-visible{outline:3px solid #f59e2a}
+.green-day-empty{visibility:hidden}
+.green-cal-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.green-cal-head h3{margin:0}.green-cal-head button{padding:5px 11px;font-weight:700}
+.green-legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;color:#5d6877;font-size:11px}
+.green-legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:4px;vertical-align:middle}
+.green-summary{font-size:12px;color:#6b7280;margin-top:9px}
 </style>
 </head>
 <body>
@@ -626,6 +644,25 @@ function miniBars(rows){
   var m=Math.max.apply(null,rows.map(function(r){return Math.abs(r[1])}).concat([1]));
   return rows.map(function(r){var n=r[1],w=Math.max(1,Math.round(Math.abs(n)/m*100));return '<div style="margin:9px 0"><div class="bar" style="border:0;padding:2px 0"><span>'+esc(r[0])+'</span><b class="'+pctClass(n)+'">'+(n>0?'+':'')+eur(n)+'</b></div><div style="background:#e9e3dc;height:9px;border-radius:9px;overflow:hidden"><div style="height:100%;width:'+w+'%;background:'+(n>=0?'#1f9d55':'#d93a3a')+'"></div></div></div>'}).join('');
 }
+var GREEN_MONTH={y:new Date().getFullYear(),m:new Date().getMonth()};
+function greenMonthMove(delta){GREEN_MONTH.m+=delta;if(GREEN_MONTH.m<0){GREEN_MONTH.m=11;GREEN_MONTH.y--}if(GREEN_MONTH.m>11){GREEN_MONTH.m=0;GREEN_MONTH.y++}dashboardView()}
+function greenOpenDay(day){CM={y:GREEN_MONTH.y,m:GREEN_MONTH.m};SEL=day;F={team:"",market:"",min:"",max:"",res:"",sport:""};setT("reg")}
+function greenCalendar(){
+  var y=GREEN_MONTH.y,m=GREEN_MONTH.m,first=(new Date(y,m,1).getDay()+6)%7,total=new Date(y,m+1,0).getDate(),monthly={};
+  P().bets.forEach(function(b){var d=bdate(b);if(d.slice(0,7)!==y+'-'+pad(m+1))return;var rec=monthly[d]||(monthly[d]={profit:0,closed:0,open:0,wins:0,losses:0});if(b.status==='open'){rec.open++;return}if(b.status==='void')return;var v=realProfit(b);rec.profit+=v;rec.closed++;if(v>0)rec.wins++;else if(v<0)rec.losses++});
+  var win=0,loss=0,even=0,h='<section class="panel-section"><div class="card"><div class="green-cal-head"><h3>Calendário de greens</h3><div><button type="button" onclick="greenMonthMove(-1)" aria-label="Mês anterior">‹</button> <b>'+MES[m]+' '+y+'</b> <button type="button" onclick="greenMonthMove(1)" aria-label="Mês seguinte">›</button></div></div><div class="green-calendar">';
+  ['S','T','Q','Q','S','S','D'].forEach(function(x){h+='<span class="weekday">'+x+'</span>'});
+  for(var z=0;z<first;z++)h+='<span class="green-day-empty"></span>';
+  for(var i=1;i<=total;i++){
+    var d=y+'-'+pad(m+1)+'-'+pad(i),r=monthly[d],kind='';
+    if(r&&r.closed){kind=r.profit>0.005?'day-win':r.profit< -0.005?'day-loss':'day-even';if(kind==='day-win')win++;else if(kind==='day-loss')loss++;else even++}
+    else if(r&&r.open)kind='day-open';
+    var detail=r&&r.closed?(r.profit>0?'+':'')+eur(money(r.profit)):(r&&r.open?r.open+' aberta'+(r.open===1?'':'s'):'Sem apostas concluídas');
+    h+='<button type="button" class="green-day '+kind+(d===today()?' day-today':'')+'" onclick="greenOpenDay(&#39;'+d+'&#39;)" title="'+fdate(d)+' · '+detail+'" aria-label="'+fdate(d)+' · '+detail+'"><span class="daynum">'+i+'</span>'+(r&&r.closed?'<small>'+(r.profit>0?'+':'')+Math.round(r.profit)+'€</small>':r&&r.open?'<small>●</small>':'')+'</button>';
+  }
+  h+='</div><div class="green-legend"><span><i style="background:#54b878"></i>Green (dia positivo)</span><span><i style="background:#e16b6b"></i>Red (dia negativo)</span><span><i style="background:#e8ba64"></i>Empate / sem lucro</span><span><i style="background:#eeeae5;border:1px solid #bbb"></i>Sem resultado</span></div><div class="green-summary">'+win+' dias verdes · '+loss+' dias vermelhos · '+even+' dias neutros. Toca num dia para ver as apostas.</div></div></section>';
+  return h;
+}
 function dashboardView(){
   var b=P().bets,days=DASH_RANGE,chosen=b.filter(function(x){return inRange(x,days)}),A=agg(chosen),B=bankSnapshot(P());
   var ranges=[["7","7 dias"],["30","30 dias"],["90","90 dias"],["365","365 dias"],["all","Tudo"]];
@@ -638,6 +675,7 @@ function dashboardView(){
       statMetric('Apostas com lucro',rate(A))+'</div>'+
     '<p class="fine-meta">'+chosen.filter(function(x){return x.status==='open'}).length+' em aberto · Odd média '+avg(chosen)+' · '+(S.view>0?'Apostas simuladas':'Resultados reais')+'</p>';
   h+='<section class="panel-section"><div class="section-title"><h3>Evolução do lucro</h3></div><div class="card graph-panel">'+chart(sortedBets(chosen.filter(closed)),0)+'</div></section>';
+  h+=greenCalendar();
   h+='<section class="panel-section"><div class="section-title"><h3>Banca real</h3><button class="link-action" onclick="openBank()">Gerir banca →</button></div><div class="stats bank-quick">'+
     (B.configured?statMetric('Disponível',eur(B.available),pctClass(B.available))+statMetric('Em aberto',eur(B.committed)):
       '<div class="card compact-note">Ainda não configuraste a banca. <button class="link-action" onclick="openBank()">Configurar agora →</button></div>')+'</div></section>';
