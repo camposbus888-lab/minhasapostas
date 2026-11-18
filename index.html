@@ -422,7 +422,7 @@ function betCard(b){
   var acts=b.status==="open"?'<button class="w" onclick="'+q("won")+'">Ganha</button><button class="l" onclick="'+q("lost")+'">Perdida</button><button onclick="'+q("void")+'">Anulada</button>':'<button onclick="'+q("open")+'">Reabrir</button>';
   acts+='<button onclick="'+q('cashout')+'">Cash out</button><button onclick="'+q('partial')+'">Parcial</button>';
   acts+='<button onclick="editBet(\''+b.id+'\')">Editar</button><button onclick="delBet(\''+b.id+'\')">✕</button>';
-  var detail=b.legs.length>1?'<details class="card" style="border-left-color:#9aa0a6"><summary>Resultados individuais ('+b.legs.filter(function(l){return l.result&&l.result!=="open"}).length+'/'+b.legs.length+')</summary>'+b.legs.map(function(l,i){return '<div class="legstatus"><b>'+esc(l.team||'Seleção '+(i+1))+'</b><div class="row"><label>Resultado<select id="lr_'+b.id+'_'+i+'">'+[["open","Pendente"],["won","Ganha"],["lost","Perdida"],["void","Anulada"],["halfwon","Meia ganha"],["halflost","Meia perdida"]].map(function(x){return '<option value="'+x[0]+'"'+((l.result||"open")===x[0]?' selected':'')+'>'+x[1]+'</option>'}).join('')+'</select></label></div></div>'}).join('')+'<button class="pri" onclick="saveLegResults(\''+b.id+'\')">Guardar resultados das seleções</button><p class="metric-note">Quando todas estiverem decididas, a aposta é liquidada automaticamente. A odd de bónus pode variar conforme as regras da casa.</p></details>':"";
+  var detail=b.legs.length>1?'<details class="card" style="border-left-color:#9aa0a6"><summary>Resultados individuais ('+b.legs.filter(function(l){return l.result&&l.result!=="open"}).length+'/'+b.legs.length+')</summary>'+b.legs.map(function(l,i){return '<div class="legstatus"><b>'+esc(l.team||'Seleção '+(i+1))+'</b><div class="row"><label>Resultado<select id="lr_'+b.id+'_'+i+'">'+[["open","Pendente"],["won","Ganha"],["lost","Perdida"],["void","Anulada"],["halfwon","Meia ganha"],["halflost","Meia perdida"]].map(function(x){return '<option value="'+x[0]+'"'+((l.result||"open")===x[0]?' selected':'')+'>'+x[1]+'</option>'}).join('')+'</select></label></div></div>'}).join('')+'<button class="ghost" onclick="markAllLegsWon(\''+b.id+'\')">✓ Todas acertaram</button><button class="pri" onclick="saveLegResults(\''+b.id+'\')">Guardar resultados das seleções</button><p class="metric-note">Quando todas estiverem decididas, a aposta é liquidada automaticamente. A odd de bónus pode variar conforme as regras da casa.</p></details>':"";
   return '<div class="card"><div class="bar" style="border:0;padding:0"><span class="mut">'+fdate(bdate(b))+' · '+(b.legs.length>1?"Múltipla":"Simples")+'</span><span class="tag t-'+b.status+'">'+lab+'</span></div>'+ln
     +'<div class="final"><span>'+eur(stk(b))+(b.bonus?' · bónus '+b.bonus+'%':"")+' · Odd <b class="or">'+o2(+b.odd)+'</b></span></div><div>'+res+'</div><div class="acts">'+acts+'</div></div>'+detail;
 }
@@ -438,6 +438,14 @@ function setStatus(id,s){
   b.status=s;
   if(s!=="open")b.settledDate=today();else delete b.settledDate;
   save();renderView();
+}
+function markAllLegsWon(id){
+  var b=P().bets.find(function(x){return x.id===id});
+  if(!b||b.legs.length<2)return;
+  b.legs.forEach(function(l,i){
+    var sel=$("lr_"+b.id+"_"+i);
+    if(sel)sel.value="won";
+  });
 }
 function saveLegResults(id){
   var b=P().bets.find(function(x){return x.id===id});if(!b||b.legs.length<2)return;
@@ -567,6 +575,25 @@ function compactRows(rows,limit){
   return '<div class="compact-rows">'+items.map(function(x){var a=x[1];return '<div class="compact-stat-row"><div class="cr-name">'+esc(x[0])+' <small>'+a.n+' apostas</small></div><div class="cr-values"><b class="'+pctClass(a.pr)+'">'+(a.pr>0?'+':'')+eur(a.pr)+'</b><small>ROI '+formatPct(roi(a))+'</small></div></div>'}).join('')+'</div>';
 }
 function collapsibleStats(title,body,open){return '<details class="fold stats-fold"'+(open?' open':'')+'><summary>'+title+'</summary><div class="fold-content">'+body+'</div></details>'}
+function marketFrequency(bets){
+  var groups={};
+  bets.forEach(function(b){
+    (b.legs||[]).forEach(function(l){
+      var raw=String(l.market||"").trim()||"Sem mercado";
+      var key=nrm(raw);
+      if(!groups[key])groups[key]={label:raw,count:0};
+      groups[key].count++;
+    });
+  });
+  return Object.keys(groups).map(function(k){return groups[k]})
+    .sort(function(a,b){return b.count-a.count||a.label.localeCompare(b.label,"pt")});
+}
+function marketFrequencyHTML(bets){
+  var rows=marketFrequency(bets);
+  return rows.length?rows.slice(0,20).map(function(r){
+    return '<div class="compact-stat-row"><span>'+esc(r.label)+'</span><b>'+r.count+' ×</b></div>';
+  }).join(''):'<p class="mut">Ainda não existem mercados registados.</p>';
+}
 function statsView(){
   var all=P().bets,bs=all.filter(function(b){return inRange(b,ANALYSIS_RANGE)}),A=agg(bs),cl=sortedBets(bs.filter(closed)),open=bs.filter(function(b){return b.status==='open'}).length;
   var h=analysisHeader()+'<div class="stats tight-stats">'+
@@ -601,6 +628,7 @@ function statsView(){
     ['weekday',compactRows(wdNames.map(function(x,i){return [x,agg(byDay[i]||[])]}).filter(function(x){return x[1].n}))],
     ['month',compactRows(Object.keys(byMonth).sort().reverse().map(function(k){return [MES[+k.slice(5)-1]+' '+k.slice(0,4),agg(byMonth[k])]}))]
   ];
+  h+=collapsibleStats('Tipos de apostas mais repetidos',marketFrequencyHTML(bs)+'<p class="metric-note">Conta cada seleção registada, incluindo múltiplas e apostas em aberto. Mercados com diferenças apenas de maiúsculas ou acentos são agrupados.</p>',false);
   h+=collapsibleStats('Equipas, mercados e datas',
     '<label class="compact-select">Ver resultados por <select aria-label="Agrupar estatísticas" onchange="statSwitch(this.value)">'+groupOptions.map(function(x){return '<option value="'+x[0]+'">'+x[1]+'</option>'}).join('')+'</select></label>'+
     '<div id="stat-categories">'+groupData.map(function(x,i){return '<div data-stat-group="'+x[0]+'"'+(i?' hidden':'')+'>'+x[1]+'</div>'}).join('')+'</div>',false);
@@ -877,7 +905,6 @@ function graphsView(){
   var outcome=[['Ganhas',GC.green,bs.filter(function(b){return b.status==='won'}).length],['Perdidas',GC.red,bs.filter(function(b){return b.status==='lost'}).length],['Parciais',GC.orange,bs.filter(function(b){return b.status==='partial'}).length],['Cash out',GC.blue,bs.filter(function(b){return b.status==='cashout'}).length],['Anuladas',GC.gray,bs.filter(function(b){return b.status==='void'}).length],['Em aberto',GC.purple,bs.filter(function(b){return b.status==='open'}).length]].map(function(x){return {label:x[0],color:x[1],value:x[2]}});
   groups.push(gGroup('Desempenho ao longo do tempo',[
     gCard('Lucro acumulado',gLine(cumulative,labels,'eur',GC.orange),true),
-    gCard('Queda face ao máximo anterior (drawdown)',gLine(drawdown,labels,'eur',GC.red),true),
     gCard('Lucro por mês (até 12 meses)',gColumns(monthRows,'eur')),
     gCard('Lucro por dia da semana',gColumns(dayRows,'eur')),
     gCard('ROI por dia da semana',gBar(dayRoi,'pct')),
@@ -897,6 +924,7 @@ function graphsView(){
     gCard('Distribuição dos valores apostados',gColumns(stakeBreaks.map(function(x){return {label:x[0],value:bs.filter(function(b){return b.stake>=x[1]&&b.stake<x[2]}).length}}),'count')),
     gCard('ROI: simples e múltiplas',gBar([['Simples',bs.filter(function(b){return b.legs.length===1})],['Múltiplas',bs.filter(function(b){return b.legs.length>1})]].map(function(x){var r=agg(x[1]);return r.n?{label:x[0],value:roi(r),count:r.n}:null}).filter(Boolean),'pct')),
     gCard('Lucro por desporto',gBar(Object.keys(bySport).map(function(k){var r=agg(bySport[k]);return {label:k,value:money(r.pr),count:r.n}}).filter(function(x){return x.count}).sort(function(x,y){return y.value-x.value}).slice(0,9),'eur')),
+    gCard('Tipos de apostas mais frequentes',gBar(marketFrequency(bs).slice(0,12).map(function(r){return {label:r.label,value:r.count}}),'count')),
     gCard('Lucro por mercado (apostas simples)',gBar(Object.keys(byMarket).map(function(k){var r=agg(byMarket[k]);return {label:k,value:money(r.pr),count:r.n}}).filter(function(x){return x.count}).sort(function(x,y){return y.value-x.value}).slice(0,10),'eur')),
     gCard('Lucro por equipa (apostas simples)',gBar(Object.keys(byTeam).map(function(k){var r=agg(byTeam[k]);return {label:k,value:money(r.pr),count:r.n}}).filter(function(x){return x.count}).sort(function(x,y){return y.value-x.value}).slice(0,10),'eur'))
   ]));
