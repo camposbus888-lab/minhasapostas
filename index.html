@@ -219,6 +219,9 @@ h3{font-size:15px;margin:12px 0 7px}
 .green-legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;color:#5d6877;font-size:11px}
 .green-legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:4px;vertical-align:middle}
 .green-summary{font-size:12px;color:#6b7280;margin-top:9px}
+.green-mode{display:flex;gap:6px;margin:12px 0 4px}.green-mode button{flex:1;padding:8px;font-weight:700}.green-mode button.active{background:#f59e2a}
+.weekly-results{display:grid;gap:7px;margin-top:10px}.week-result{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid #ded8d0;border-radius:8px;background:#eeeae5;padding:11px;color:#14243a}.week-result.day-win{background:#d7f2df}.week-result.day-loss{background:#f9dede}.week-result.day-even{background:#fceac9}.week-result small{display:block;color:#687386;margin-top:3px}.week-result strong{white-space:nowrap}
+.profit-interactive svg{width:100%;height:auto;display:block}.profit-detail{background:#eeeae5;color:#14243a;border-radius:7px;padding:9px;font-size:13px}
 </style>
 </head>
 <body>
@@ -651,13 +654,32 @@ function be(a){var c=a.filter(function(b){return closed(b)&&b.status!=="void"});
 function unit(){if(S.view>0)return S.view;var c={},best=0,bu=0;P().bets.forEach(function(b){var k=b.stake;c[k]=(c[k]||0)+1;if(c[k]>best){best=c[k];bu=+k}});return bu}
 function pc(n){return n.toFixed(1).replace(".",",")}
 function beRow(t,r){if(!r)return '<div class="bar"><span>'+t+'</span><span class="mut">sem dados</span></div>';return '<div class="bar"><span>'+t+' <span class="mut">(odd média '+o2(r.o)+')</span></span><span>implícita <b>'+pc(r.need)+'%</b> · lucro em <b>'+pc(r.cur)+'%</b></span></div>'}
-function chart(cl,base){base=base||0;
-  if(cl.length<2)return '<span class="mut">Precisas de pelo menos 2 apostas concluídas.</span>';
-  var c=base,pts=[base];cl.forEach(function(b){c+=profit(b);pts.push(c)});
-  var mn=Math.min.apply(null,pts),mx=Math.max.apply(null,pts);if(mn===mx){mn-=1;mx+=1}
-  var W=300,H=110,p=8,X=function(i){return p+i*(W-2*p)/(pts.length-1)},Y=function(v){return H-p-(v-mn)/(mx-mn)*(H-2*p)};
-  var d=pts.map(function(v,i){return(i?"L":"M")+X(i).toFixed(1)+" "+Y(v).toFixed(1)}).join(" ");
-  return '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto"><line x1="'+p+'" x2="'+(W-p)+'" y1="'+Y(base)+'" y2="'+Y(base)+'" stroke="#9aa0a6" stroke-dasharray="4 4"/><path d="'+d+'" fill="none" stroke="#f59e2a" stroke-width="3" stroke-linejoin="round"/></svg><div class="mut" style="text-align:right">Atual: '+eur(c)+'</div>';
+var PROFIT_CHARTS={};
+function profitPoint(id,i){
+ var data=PROFIT_CHARTS[id],root=$(id);if(!data||!root)return;
+ var dot=root.querySelector('.profit-marker'),detail=root.querySelector('.profit-detail');
+ dot.setAttribute('cx',data.x[i]);dot.setAttribute('cy',data.y[i]);
+ detail.textContent=data.labels[i]+' · '+eur(data.values[i]);
+}
+function chart(cl,base){
+ if(!cl.length)return '<span class="mut">Ainda sem apostas concluídas.</span>';
+ var values=[base||0],labels=['Início'],sum=base||0;
+ cl.forEach(function(b){sum+=profit(b);values.push(sum);labels.push(fdate(bdate(b)))});
+ var W=600,H=250,L=72,R=18,T=16,B=52,mn=Math.min.apply(null,values.concat([0])),mx=Math.max.apply(null,values.concat([0]));
+ var extra=Math.max((mx-mn)*.12,1);mn-=extra;mx+=extra;
+ var X=function(i){return L+i*(W-L-R)/(values.length-1)},Y=function(v){return H-B-(v-mn)*(H-T-B)/(mx-mn)};
+ var grid='';for(var j=0;j<=4;j++){var v=mn+(mx-mn)*j/4,y=Y(v);grid+='<line x1="'+L+'" y1="'+y+'" x2="'+(W-R)+'" y2="'+y+'" stroke="#d7d2ca" stroke-dasharray="4 5"/><text x="'+(L-7)+'" y="'+(y+4)+'" text-anchor="end" font-size="12" fill="#657185">'+esc(o2(v))+'</text>'}
+ var path=values.map(function(v,i){return(i?'L':'M')+X(i)+' '+Y(v)}).join(' ');
+ var id='profit_'+Math.random().toString(36).slice(2);
+ PROFIT_CHARTS[id]={values:values,labels:labels,x:values.map(function(_,i){return X(i)}),y:values.map(Y)};
+ var dots=values.map(function(v,i){return '<circle cx="'+X(i)+'" cy="'+Y(v)+'" r="11" fill="transparent" tabindex="0" role="button" onclick="profitPoint(&quot;'+id+'&quot;,'+i+')" onfocus="profitPoint(&quot;'+id+'&quot;,'+i+')" onmouseenter="profitPoint(&quot;'+id+'&quot;,'+i+')"><title>'+esc(labels[i]+' · '+eur(v))+'</title></circle>'}).join('');
+ var ticks=[0,Math.floor((values.length-1)/2),values.length-1].filter(function(x,i,a){return a.indexOf(x)===i}).map(function(i){return '<text x="'+X(i)+'" y="'+(H-32)+'" text-anchor="middle" font-size="11" fill="#657185">'+esc(labels[i])+'</text>'}).join('');
+ return '<div class="profit-interactive" id="'+id+'"><svg viewBox="0 0 '+W+' '+H+'" aria-label="Eixo horizontal: data da aposta. Eixo vertical: lucro acumulado em euros." role="img">'+grid+
+ '<line x1="'+L+'" y1="'+T+'" x2="'+L+'" y2="'+(H-B)+'" stroke="#657185"/><line x1="'+L+'" y1="'+(H-B)+'" x2="'+(W-R)+'" y2="'+(H-B)+'" stroke="#657185"/>'+
+ '<path d="'+path+'" fill="none" stroke="#e59a22" stroke-width="3"/><circle class="profit-marker" cx="'+X(values.length-1)+'" cy="'+Y(values[values.length-1])+'" r="5" fill="#e59a22"/>'+dots+ticks+
+ '<text x="'+W/2+'" y="'+(H-4)+'" text-anchor="middle" font-size="12" font-weight="700" fill="#14243a">Data da aposta</text>'+
+ '<text transform="translate(15 '+H/2+') rotate(-90)" text-anchor="middle" font-size="12" font-weight="700" fill="#14243a">Lucro acumulado (€)</text></svg>'+
+ '<div class="profit-detail">Último registo: '+esc(labels[labels.length-1])+' · '+eur(values[values.length-1])+'</div><p class="mut">Toca nos pontos para consultar os valores.</p></div>';
 }
 
 /* === BetTracker Pro: banca, análise e comparação === */
@@ -672,13 +694,33 @@ function miniBars(rows){
   var m=Math.max.apply(null,rows.map(function(r){return Math.abs(r[1])}).concat([1]));
   return rows.map(function(r){var n=r[1],w=Math.max(1,Math.round(Math.abs(n)/m*100));return '<div style="margin:9px 0"><div class="bar" style="border:0;padding:2px 0"><span>'+esc(r[0])+'</span><b class="'+pctClass(n)+'">'+(n>0?'+':'')+eur(n)+'</b></div><div style="background:#e9e3dc;height:9px;border-radius:9px;overflow:hidden"><div style="height:100%;width:'+w+'%;background:'+(n>=0?'#1f9d55':'#d93a3a')+'"></div></div></div>'}).join('');
 }
+var GREEN_MODE="month";
+function greenModeSet(v){GREEN_MODE=v;dashboardView()}
 var GREEN_MONTH={y:new Date().getFullYear(),m:new Date().getMonth()};
 function greenMonthMove(delta){GREEN_MONTH.m+=delta;if(GREEN_MONTH.m<0){GREEN_MONTH.m=11;GREEN_MONTH.y--}if(GREEN_MONTH.m>11){GREEN_MONTH.m=0;GREEN_MONTH.y++}dashboardView()}
 function greenOpenDay(day){CM={y:GREEN_MONTH.y,m:GREEN_MONTH.m};SEL=day;F={team:"",market:"",min:"",max:"",res:"",sport:""};setT("reg")}
+function greenWeeklyCalendar(){
+ var y=GREEN_MONTH.y,m=GREEN_MONTH.m,start=new Date(y,m,1),last=new Date(y,m+1,0);
+ start.setDate(start.getDate()-((start.getDay()+6)%7));
+ var h='<div class="weekly-results">';
+ while(start<=last){
+  var end=new Date(start);end.setDate(end.getDate()+6);
+  var from=iso(start),to=iso(end),total=0,n=0,w=0,l=0;
+  P().bets.forEach(function(b){var d=bdate(b);if(d<from||d>to||b.status==='open'||b.status==='void')return;
+   var v=realProfit(b);total+=v;n++;if(v>0)w++;else if(v<0)l++;
+  });
+  var cl=n?(total>0.005?'day-win':total< -0.005?'day-loss':'day-even'):'';
+  h+='<div class="week-result '+cl+'"><div><b>'+pad(start.getDate())+'/'+pad(start.getMonth()+1)+' – '+pad(end.getDate())+'/'+pad(end.getMonth()+1)+'</b><small>'+w+' greens · '+l+' reds</small></div><strong>'+(n?(total>0?'+':'')+eur(money(total)):'—')+'</strong></div>';
+  start.setDate(start.getDate()+7);
+ }
+ return h+'</div><p class="green-summary">Semanas de segunda a domingo. Inclui apostas concluídas, mesmo quando a semana atravessa dois meses.</p>';
+}
 function greenCalendar(){
+ if(GREEN_MODE==='week')return '<section class="panel-section"><div class="card"><div class="green-cal-head"><h3>Greens por semana</h3><div><button onclick="greenMonthMove(-1)">‹</button> <b>'+MES[GREEN_MONTH.m]+' '+GREEN_MONTH.y+'</b> <button onclick="greenMonthMove(1)">›</button></div></div><div class="green-mode"><button onclick="greenModeSet(&quot;month&quot;)">Mês</button><button class="active" onclick="greenModeSet(&quot;week&quot;)">Semanas</button></div>'+greenWeeklyCalendar()+'</div></section>';
+
   var y=GREEN_MONTH.y,m=GREEN_MONTH.m,first=(new Date(y,m,1).getDay()+6)%7,total=new Date(y,m+1,0).getDate(),monthly={};
   P().bets.forEach(function(b){var d=bdate(b);if(d.slice(0,7)!==y+'-'+pad(m+1))return;var rec=monthly[d]||(monthly[d]={profit:0,closed:0,open:0,wins:0,losses:0});if(b.status==='open'){rec.open++;return}if(b.status==='void')return;var v=realProfit(b);rec.profit+=v;rec.closed++;if(v>0)rec.wins++;else if(v<0)rec.losses++});
-  var win=0,loss=0,even=0,h='<section class="panel-section"><div class="card"><div class="green-cal-head"><h3>Calendário de greens</h3><div><button type="button" onclick="greenMonthMove(-1)" aria-label="Mês anterior">‹</button> <b>'+MES[m]+' '+y+'</b> <button type="button" onclick="greenMonthMove(1)" aria-label="Mês seguinte">›</button></div></div><div class="green-calendar">';
+  var win=0,loss=0,even=0,h='<section class="panel-section"><div class="card"><div class="green-cal-head"><h3>Calendário de greens</h3><div><button type="button" onclick="greenMonthMove(-1)" aria-label="Mês anterior">‹</button> <b>'+MES[m]+' '+y+'</b> <button type="button" onclick="greenMonthMove(1)" aria-label="Mês seguinte">›</button></div></div><div class="green-mode"><button class="active" onclick="greenModeSet(&quot;month&quot;)">Mês</button><button onclick="greenModeSet(&quot;week&quot;)">Semanas</button></div><div class="green-calendar">';
   ['S','T','Q','Q','S','S','D'].forEach(function(x){h+='<span class="weekday">'+x+'</span>'});
   for(var z=0;z<first;z++)h+='<span class="green-day-empty"></span>';
   for(var i=1;i<=total;i++){
