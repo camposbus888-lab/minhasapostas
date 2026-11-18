@@ -222,6 +222,21 @@ h3{font-size:15px;margin:12px 0 7px}
 .green-mode{display:flex;gap:6px;margin:12px 0 4px}.green-mode button{flex:1;padding:8px;font-weight:700}.green-mode button.active{background:#f59e2a}
 .weekly-results{display:grid;gap:7px;margin-top:10px}.week-result{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid #ded8d0;border-radius:8px;background:#eeeae5;padding:11px;color:#14243a}.week-result.day-win{background:#d7f2df}.week-result.day-loss{background:#f9dede}.week-result.day-even{background:#fceac9}.week-result small{display:block;color:#687386;margin-top:3px}.week-result strong{white-space:nowrap}
 .profit-interactive svg{width:100%;height:auto;display:block}.profit-detail{background:#eeeae5;color:#14243a;border-radius:7px;padding:9px;font-size:13px}
+
+.market-frequency-list{display:grid;gap:7px}
+.market-frequency-item{border:1px solid #ded8d0;border-radius:9px;background:#f5f2ee;overflow:hidden}
+.market-frequency-item>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;color:#14243a}
+.market-frequency-item>summary::-webkit-details-marker{display:none}
+.market-frequency-title{font-weight:700;min-width:0;overflow-wrap:anywhere}
+.market-frequency-title small{display:block;font-size:12px;font-weight:600;margin-top:3px}
+.market-frequency-count{font-weight:700;white-space:nowrap;color:#14243a}
+.market-green{color:#19844c}.market-red{color:#ce3838}.market-neutral{color:#7a8190}
+.market-frequency-matches{border-top:1px solid #ded8d0;padding:0 12px}
+.market-match{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #e3dfda;font-size:13px;color:#14243a}
+.market-match:last-child{border-bottom:0}
+.market-match>div{min-width:0;overflow-wrap:anywhere}
+.market-match small{display:block;color:#6b7280;margin-top:3px}
+.market-match>span{white-space:nowrap;font-size:12px;font-weight:700}
 </style>
 </head>
 <body>
@@ -578,14 +593,24 @@ function compactRows(rows,limit){
   return '<div class="compact-rows">'+items.map(function(x){var a=x[1];return '<div class="compact-stat-row"><div class="cr-name">'+esc(x[0])+' <small>'+a.n+' apostas</small></div><div class="cr-values"><b class="'+pctClass(a.pr)+'">'+(a.pr>0?'+':'')+eur(a.pr)+'</b><small>ROI '+formatPct(roi(a))+'</small></div></div>'}).join('')+'</div>';
 }
 function collapsibleStats(title,body,open){return '<details class="fold stats-fold"'+(open?' open':'')+'><summary>'+title+'</summary><div class="fold-content">'+body+'</div></details>'}
+function marketLegResult(b,l){
+  if(l.result&&l.result!=="open")return l.result;
+  if(b.legs.length===1)return b.status;
+  if(b.status==="won")return "won";
+  if(b.status==="void")return "void";
+  return "open";
+}
 function marketFrequency(bets){
   var groups={};
   bets.forEach(function(b){
     (b.legs||[]).forEach(function(l){
-      var raw=String(l.market||"").trim()||"Sem mercado";
-      var key=nrm(raw);
-      if(!groups[key])groups[key]={label:raw,count:0};
-      groups[key].count++;
+      var raw=String(l.market||"").trim()||"Sem mercado",key=nrm(raw);
+      if(!groups[key])groups[key]={label:raw,count:0,won:0,lost:0,entries:[]};
+      var g=groups[key],res=marketLegResult(b,l);
+      g.count++;
+      if(res==="won"||res==="halfwon")g.won++;
+      if(res==="lost"||res==="halflost")g.lost++;
+      g.entries.push({bet:b,leg:l,result:res});
     });
   });
   return Object.keys(groups).map(function(k){return groups[k]})
@@ -593,9 +618,15 @@ function marketFrequency(bets){
 }
 function marketFrequencyHTML(bets){
   var rows=marketFrequency(bets);
-  return rows.length?rows.slice(0,20).map(function(r){
-    return '<div class="compact-stat-row"><span>'+esc(r.label)+'</span><b>'+r.count+' ×</b></div>';
-  }).join(''):'<p class="mut">Ainda não existem mercados registados.</p>';
+  if(!rows.length)return '<p class="mut">Ainda não existem mercados registados.</p>';
+  var names={won:"Green",lost:"Red",open:"Pendente",void:"Anulada",halfwon:"Meia ganha",halflost:"Meia perdida"};
+  return '<div class="market-frequency-list">'+rows.map(function(r){
+    var detail=r.entries.slice().sort(function(a,b){return bdate(b.bet).localeCompare(bdate(a.bet))}).map(function(e){
+      var b=e.bet,l=e.leg,res=e.result,cls=res==="won"||res==="halfwon"?"market-green":res==="lost"||res==="halflost"?"market-red":"market-neutral";
+      return '<div class="market-match"><div><b>'+esc(l.team||disp(l)||"Jogo não indicado")+'</b><small>'+esc(fdate(bdate(b)))+' · '+esc(l.sport||"Futebol")+' · Odd '+o2(+l.odd||1)+(b.legs.length>1?' · Múltipla ('+b.legs.length+' seleções)':' · Simples')+'</small></div><span class="'+cls+'">'+esc(names[res]||"Pendente")+'</span></div>';
+    }).join('');
+    return '<details class="market-frequency-item"><summary><span class="market-frequency-title">'+esc(r.label)+'<small><span class="market-green">● '+r.won+'</span> <span class="market-red">● '+r.lost+'</span></small></span><span class="market-frequency-count">'+r.count+' × <span aria-hidden="true">⌄</span></span></summary><div class="market-frequency-matches">'+detail+'</div></details>';
+  }).join('')+'</div>';
 }
 function statsView(){
   var all=P().bets,bs=all.filter(function(b){return inRange(b,ANALYSIS_RANGE)}),A=agg(bs),cl=sortedBets(bs.filter(closed)),open=bs.filter(function(b){return b.status==='open'}).length;
@@ -631,7 +662,7 @@ function statsView(){
     ['weekday',compactRows(wdNames.map(function(x,i){return [x,agg(byDay[i]||[])]}).filter(function(x){return x[1].n}))],
     ['month',compactRows(Object.keys(byMonth).sort().reverse().map(function(k){return [MES[+k.slice(5)-1]+' '+k.slice(0,4),agg(byMonth[k])]}))]
   ];
-  h+=collapsibleStats('Tipos de apostas mais repetidos',marketFrequencyHTML(bs)+'<p class="metric-note">Conta cada seleção registada, incluindo múltiplas e apostas em aberto. Mercados com diferenças apenas de maiúsculas ou acentos são agrupados.</p>',false);
+  h+=collapsibleStats('Tipos de apostas mais repetidos',marketFrequencyHTML(bs)+'<p class="metric-note">Toca num tipo para consultar os jogos. Os símbolos verdes e vermelhos contam os resultados individuais conhecidos; seleções pendentes ou sem resultado individual não entram nessas contagens.</p>',false);
   h+=collapsibleStats('Equipas, mercados e datas',
     '<label class="compact-select">Ver resultados por <select aria-label="Agrupar estatísticas" onchange="statSwitch(this.value)">'+groupOptions.map(function(x){return '<option value="'+x[0]+'">'+x[1]+'</option>'}).join('')+'</select></label>'+
     '<div id="stat-categories">'+groupData.map(function(x,i){return '<div data-stat-group="'+x[0]+'"'+(i?' hidden':'')+'>'+x[1]+'</div>'}).join('')+'</div>',false);
